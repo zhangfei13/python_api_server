@@ -1,0 +1,29 @@
+Instant Client地址 https://www.oracle.com/database/technologies/instant-client/linux-x86-64-downloads.html
+
+1、下载对应版本rpm，目前只需要basic就可以, Oracle Call Interface 19.3 can connect to Oracle Database 11.2 or later
+oracle-instantclient19.3-basic-19.3.0.0.0-1.x86_64.rpm
+oracle-instantclient19.3-devel-19.3.0.0.0-1.x86_64.rpm
+oracle-instantclient19.3-sqlplus-19.3.0.0.0-1.x86_64.rpm
+
+2、安装rpm包
+rpm -ivh oracle-instantclient19.3-basic-19.3.0.0.0-1.x86_64.rpm
+rpm -ivh oracle-instantclient19.3-devel-19.3.0.0.0-1.x86_64.rpm
+rpm -ivh oracle-instantclient19.3-sqlplus-19.3.0.0.0-1.x86_64.rpm
+
+3、环境配置
+vi /etc/ld.so.conf  在最后加入
+/usr/lib/oracle/19.3/client64/lib
+执行ldconfig 重启ldconfig
+
+vi /root/.bash_profile  增加如下两行：目录由自己随意定义
+export ORACLE_HOME=/opt/instantclient_19_3
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ORACLE_HOME
+运行source /root/.bash_profile使改动生效
+
+vi /etc/profile最后加入
+export ORACLE_HOME=/usr/lib/oracle/19.3/client64
+export LD_LIBRARY_PATH=:$ORACLE_HOME/lib:/usr/local/lib:$LD_LIBRARY_PATH:.
+export TNS_ADMIN=$ORACLE_HOME
+export PATH=$PATH:$ORACLE_HOME/bin:.
+运行source /etc/profile使改动生效
+

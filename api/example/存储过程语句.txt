@@ -1,0 +1,130 @@
+##################################### DB2 #####################################
+#### 连接到db2本地实例, 打开db2cmd
+connect to db1 user db2admin using 12345
+
+#### 删除存储过程：
+DROP PROCEDURE "SELECT_TEST"
+
+#### 创建不带参数存储过程：
+CREATE PROCEDURE "SELECT_TEST1"() \
+DYNAMIC RESULT SETS 10 \
+BEGIN \
+P1: BEGIN \
+	DECLARE mycursor CURSOR WITH RETURN FOR select * from test where a='muti2' limit 2; \
+	OPEN mycursor; \
+END P1; \
+END
+
+#### 创建带参存储过程：
+CREATE PROCEDURE "SELECT_TEST"(IN test_A VARCHAR(50), OUT test_C INT, OUT test_D DOUBLE) \
+DYNAMIC RESULT SETS 10 \
+BEGIN \
+P1: BEGIN \
+	DECLARE mycursor CURSOR WITH RETURN FOR select * from test where a=test_A limit 2; \
+	OPEN mycursor; \
+END P1; \
+select C,D into test_C,test_D from test where a=test_A limit 1; \
+END
+
+#### 执行存储过程
+BEGIN \
+DECLARE test_C INT; \
+DECLARE test_D DOUBLE; \
+call SELECT_TEST('muti1', test_C, test_D); \
+END
+
+
+##################################### Oracle #####################################
+#### 创建存储过程
+CREATE OR REPLACE
+procedure select_test1(test_A in varchar2, test_C out number, test_D out number) as
+begin
+	select C into test_C from "test1" where A=test_A and ROWNUM < 2;
+	test_D := '99';
+end select_test1;
+
+#### 创建带返回结果集的存储过程
+CREATE OR REPLACE
+procedure select_test2(test_A in varchar2, cur out sys_refcursor) as
+begin
+	open cur for select * from "test1" where A=test_A;
+end select_test2;
+
+
+##################################### Mysql #####################################
+#### 创建带参数的存储过程（查询语句可以获取到结果集）
+CREATE PROCEDURE SELECT_TEST(IN test_A VARCHAR(50), OUT test_C INT, OUT test_D DOUBLE)
+BEGIN
+P1: BEGIN
+	select * from test where a=test_A limit 2;
+END P1;
+select C,D into test_C,test_D from test where a=test_A limit 1;
+END
+
+#### 创建无参存储过程
+CREATE PROCEDURE SELECT_TEST1()
+BEGIN
+P1: BEGIN
+	INSERT INTO test(a, b, c, d) VALUES('pin', 'sn', 3, 3.3);
+END P1;
+END
+
+#### 。。。
+delimiter $$        # 自定义 mysql 的分隔符
+CREATE  PROCEDURE p1(
+    in i1 int,      # 仅用于传入参数用
+    in i2 int,
+    inout i3 int,   # 既可以传入又可以当作返回值
+    out r1 int      # 仅用于返回值用，外部传进来的值无用
+)
+BEGIN
+    DECLARE temp1 int;
+    DECLARE temp2 int default 0;
+    set temp1 = 1;
+    set r1 = i1 + i2 + temp1 + temp2;
+    set i3 = i3 + 100;
+        SELECT * FROM test limit 10;
+end $$
+delimiter ;
+
+##################################### Mssql #####################################
+#### 创建无参存储过程
+create procedure select_test0
+as
+begin
+	insert into test(a, b, c, d) values('sin', 'bs', 5, 10.9)
+end
+
+#### 创建有参存储过程
+create procedure select_test1
+@test_A nvarchar(64),
+@test_C INT output,
+@test_D DECIMAL(10,2) output
+as
+begin
+    if(@test_A is not null and @test_A <> '')
+    begin
+        select top 1 @test_C=c, @test_D=d from test where a=@test_A
+    end
+    else
+    begin
+        set @test_C='100'
+		set @test_D='100.12'
+    end
+end
+
+#### 创建有结果集/返回值/出参的存储过程
+create procedure select_test2
+@test_A nvarchar(64),
+@test_C INT output,
+@test_D DECIMAL(10,2) output
+as
+begin
+		select * from test where a=@test_A
+		set @test_C='100'
+		set @test_D='100.12'
+		RETURN 10
+end
+
+
+
